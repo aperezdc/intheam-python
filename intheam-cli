@@ -1,0 +1,101 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+# vim:fenc=utf-8
+#
+# Copyright © 2015 Adrian Perez <aperez@igalia.com>
+#
+# Distributed under terms of the MIT license.
+
+import asyncio
+import intheam
+import click
+import os
+
+
+@click.group()
+@click.option("--token", envvar="INTHEAM_TOKEN", required=True,
+        help="inthe.am API token")
+@click.pass_context
+def cli(ctx, token):
+    if not token or ":" not in token:
+        raise SystemExit("Invalid/missing API access token")
+    ctx.obj = intheam.InTheAm(token)
+
+
+def print_task_list(result):
+    for task in (yield from result):
+        click.echo("{0.uuid!s} {0.description!s}".format(task))
+
+def pprint_result(result):
+    from pprint import pformat
+    text = pformat((yield from result))
+    if text.count("\n") > 25:
+        click.echo_via_pager(text)
+    else:
+        click.echo(text)
+
+
+print_fields = (
+    "description",
+    "project",
+    "id",
+    "status",
+    "priority",
+    "entry",
+    "due",
+    "scheduled",
+    "modified",
+    "start",
+    "progress",
+)
+def print_task(result):
+    task = yield from result
+    for field in print_fields:
+        value = getattr(task, field, None)
+        if value is None:
+            continue
+        click.echo("{!s:<12}: {!s}".format(field, value))
+
+
+@cli.command("user-status")
+@click.pass_obj
+def user_status(api):
+    """
+    Status of the user account.
+    """
+    asyncio.get_event_loop().run_until_complete(
+            pprint_result(api.user_status()))
+
+
+@cli.command()
+@click.pass_obj
+def pending(api):
+    """
+    Show a list of pending tasks.
+    """
+    asyncio.get_event_loop().run_until_complete(
+            print_task_list(api.pending()))
+
+
+@cli.command()
+@click.pass_obj
+def completed(api):
+    """
+    Show a list of completed tasks.
+    """
+    asyncio.get_event_loop().run_until_complete(
+            print_task_list(api.completed()))
+
+
+@cli.command()
+@click.argument("uuid", "Unique identifier of the task")
+@click.pass_obj
+def task(api, uuid):
+    """
+    Show the details of a task.
+    """
+    asyncio.get_event_loop().run_until_complete(
+            print_task(api.task(uuid)))
+
+
+if __name__ == "__main__": cli()
