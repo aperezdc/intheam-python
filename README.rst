@@ -2,7 +2,8 @@
  InThe.AM API for Python
 =========================
 
-Python client module for the `Inthe.AM <https://inthe.am/>_` API.
+Python client module for the `Inthe.AM <https://inthe.am/>`_
+`REST API <http://intheam.readthedocs.org/en/latest/api/index.html>`_:
 
 .. code-block:: python
 
