@@ -2,6 +2,14 @@
  InThe.AM API for Python
 =========================
 
+.. image:: https://img.shields.io/travis/aperezdc/intheam-python.svg?style=flat
+   :target: https://travis-ci.org/aperezdc/intheam-python
+   :alt: Build Status
+
+.. image:: https://img.shields.io/coveralls/aperezdc/intheam-python/master.svg?style=flat
+   :target: https://coveralls.io/r/aperezdc/intheam-python?branch=master
+   :alt: Code Coverage
+
 Python client module for the `Inthe.AM <https://inthe.am/>`_
 `REST API <http://intheam.readthedocs.org/en/latest/api/index.html>`_:
 
