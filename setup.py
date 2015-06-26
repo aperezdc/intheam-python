@@ -22,7 +22,7 @@ def file_contents(*relpath):
 if __name__ == "__main__":
     setup(
         name="intheam",
-        version="0.1",
+        version="0.0.1",
         description="Wrapper around the inthe.am API",
         long_description=file_contents("README.rst"),
         author="Adrián Pérez de Castro",
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         },
         license="MIT",
         classifiers=[
-            "Development Status :: 4 - Beta",
+            "Development Status :: 3 - Alpha",
             "Intended Audience :: Developers",
             "Natural Language :: English",
             "Programming Language :: Python :: 3.4",
