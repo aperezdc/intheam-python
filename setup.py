@@ -6,8 +6,7 @@
 #
 # Distributed under terms of the MIT license.
 
-from setuptools import setup, find_packages
-from setuptools import find_packages
+from setuptools import setup
 from codecs import open
 from os import path
 import sys
