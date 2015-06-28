@@ -21,7 +21,7 @@ def file_contents(*relpath):
 if __name__ == "__main__":
     setup(
         name="intheam",
-        version="0.0.1",
+        version="0.0.2",
         description="Wrapper around the inthe.am API",
         long_description=file_contents("README.rst"),
         author="Adrián Pérez de Castro",
@@ -46,5 +46,4 @@ if __name__ == "__main__":
             "Operating System :: OS Independent"
         ],
         test_suite="test",
-        include_package_data=True,
     )
