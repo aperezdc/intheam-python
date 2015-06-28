@@ -12,9 +12,9 @@ Python module for accessing the inthe.am API.
 The API consumed by this module is described here:
 http://intheam.readthedocs.org/en/latest/api/index.html
 """
-from datetime import datetime
+
+import lasso
 import aiohttp
-import json
 import schema
 import uuid
 
@@ -22,119 +22,34 @@ import uuid
 BASE_URL = "https://inthe.am/api/v1"
 
 
-class Enum(object):
-    def __init__(self, name, *arg, **kw):
-        self.__name__ = name
-        self.__reverse_map = {}
+class Priority(lasso.Enum):
+    HIGH   = "H"
+    MEDIUM = "M"
+    LOW    = "L"
 
-        for name in arg:
-            name = str(name)
-            kw[name] = name
-        for k, v in kw.items():
-            setattr(self, k, v)
-            self.__reverse_map[v] = k
-
-    def value(self, name):
-        return getattr(self, name)
-
-    def name(self, value):
-        return self.__reverse_map[value]
-
-    def __contains__(self, name):
-        return hasattr(self, name)
-
-    def __call__(self, value):
-        if value in self.__reverse_map:
-            return value
-        elif isinstance(value, str) and value in self:
-            return self.value(value)
-        else:
-            raise ValueError(value)
+class Status(lasso.Enum):
+    PENDING   = "pending"
+    COMPLETED = "completed"
+    WAITING   = "waiting"
+    DELETED   = "deleted"
 
 
-Priority = Enum("Priority", "H", "M", "L")
-Status   = Enum("Status", "pending", "completed", "waiting", "deleted")
+class SchemaDate(lasso.Timestamp):
+    __format__ = lasso.Timestamp.FORMAT_RFC_2822
 
-DATE_FORMAT = "%a, %d %b %Y %H:%M:%S %z"
-def parse_date(s):
-    from datetime import datetime
-    if isinstance(s, datetime):
-        return s
-    return datetime.strptime(s, DATE_FORMAT)
-
-def parse_uuid(s):
-    if isinstance(s, uuid.UUID):
-        return s
-    return uuid.UUID(s)
-
-SchemaUUID   = schema.Use(parse_uuid)
-SchemaDate   = schema.Use(parse_date)
-SchemaString = schema.And(str, len)
+SchemaString = lasso.And(str, len)
 
 
-annotation_schema = schema.Schema({
-    "description" : SchemaString,
-    "entry"       : schema.Or(None, SchemaDate),
-})
-
-
-class Schemed(object):
-    __schema__ = None
-    __slots__  = ("_data",)
-
-    def __init__(self, *arg, **kw):
-        object.__setattr__(self, "_data", ())
-        self.update(*arg, **kw)
-
-    def __getattr__(self, key):
-        d = object.__getattribute__(self, "_data")
-        if key in d:
-            return d[key]
-        else:
-            return object.__getattribute__(self, key)
-
-    def __setattr__(self, key, value):
-        if key.startswith("_"):
-            object.__setattr__(self, key, value)
-        else:
-            self.update({ key: value })
-
-    def update(self, *arg, **kw):
-        d = dict(object.__getattribute__(self, "_data"))
-        d.update(*arg, **kw)
-        object.__setattr__(self, "_data", self.__schema__.validate(d))
-        return self
-
-    def to_json(self, *arg, **kw):
-        d = dict(object.__getattribute__(self, "_data"))
-        return CustomJSONEncoder(*arg, **kw).encode(d)
-
-    def __iter__(self):
-        return object.__getattribute__(self, "_data").items()
-
-    def keys(self):
-        return self._data.keys()
-
-    @classmethod
-    def validate(cls, data):
-        if isinstance(data, cls):
-            return data
-        elif isinstance(data, dict):
-            return cls(**data)
-        else:
-            raise ValueError(data)
-
-
-class Annotation(Schemed):
-    __schema__ = schema.Schema({
+class Annotation(lasso.Schemed):
+    __schema__ = {
         "description" : SchemaString,
-        "entry"       : schema.Or(None, SchemaDate),
-    })
+        "entry"       : lasso.Or(None, SchemaDate),
+    }
     __NOW = object()
 
     def __init__(self, description, entry=__NOW):
         if entry is self.__NOW:
-            entry = datetime.now()
+            entry = SchemaDate.now()
         super(Annotation, self).__init__(
                 description=description,
                 entry=entry)
@@ -147,48 +62,48 @@ class Annotation(Schemed):
             return super(Annotation, cls).validate(data)
 
 
-class Task(Schemed):
-    __schema__ = schema.Schema({
+class Task(lasso.Schemed):
+    __schema__ = {
         "description"  : SchemaString,
-        "status"       : schema.Or(None, schema.Use(Status)),
-        "priority"     : schema.Or(None, schema.Use(Priority)),
-        "id"           : SchemaUUID,
+        "status"       : lasso.Or(None, Status),
+        "priority"     : lasso.Or(None, Priority),
+        "id"           : lasso.UUID,
         "annotations"  : [Annotation],
-        "blocks"       : [SchemaUUID],
-        "depends"      : [SchemaUUID],
-        "due"          : schema.Or(None, SchemaDate),
+        "blocks"       : [lasso.UUID],
+        "depends"      : [lasso.UUID],
+        "due"          : lasso.Or(None, SchemaDate),
         "entry"        : SchemaDate,
         "modified"     : SchemaDate,
-        "progress"     : schema.Or(None, float),
-        "project"      : schema.Or(None, SchemaString),
-        "scheduled"    : schema.Or(None, SchemaDate),
-        "start"        : schema.Or(None, SchemaDate),
+        "progress"     : lasso.Or(None, float),
+        "project"      : lasso.Or(None, SchemaString),
+        "scheduled"    : lasso.Or(None, SchemaDate),
+        "start"        : lasso.Or(None, SchemaDate),
         "short_id"     : int,
         "urgency"      : float,
         "tags"         : [SchemaString],
 
         # Optional values added by the inthe.am API,
         # which locally created tasks do not have
-        schema.Optional("resource_uri") : schema.Or(None, SchemaString),
-        schema.Optional("url")          : schema.Or(None, SchemaString),
-        schema.Optional("uuid")         : SchemaUUID,
+        lasso.Optional("resource_uri") : lasso.Or(None, SchemaString),
+        lasso.Optional("url")          : lasso.Or(None, SchemaString),
+        lasso.Optional("uuid")         : lasso.UUID,
 
         # Validated but ignored.
-        "imask" : schema.Or(None, str),
-        "wait"  : schema.Or(None, uuid.UUID),
+        "imask" : lasso.Or(None, str),
+        "wait"  : lasso.Or(None, lasso.UUID),
 
         # inthe.am specific values; also validated but not used.
         # TODO: Check whether those are completely correct
-        schema.Optional("intheamattachments")          : schema.Or(None, [SchemaString]),
-        schema.Optional("intheamkanbanassignee")       : schema.Or(None, str),
-        schema.Optional("intheamkanbanboarduuid")      : schema.Or(None, uuid.UUID),
-        schema.Optional("intheamkanbancolor")          : schema.Or(None, str),
-        schema.Optional("intheamkanbancolumn")         : schema.Or(None, str),
-        schema.Optional("intheamkanbansortorder")      : schema.Or(None, str),
-        schema.Optional("intheamkanbantaskuuid")       : schema.Or(None, uuid.UUID),
-        schema.Optional("intheamoriginalemailid")      : schema.Or(None, str),
-        schema.Optional("intheamoriginalemailsubject") : schema.Or(None, str),
-    })
+        lasso.Optional("intheamattachments")          : schema.Or(None, [SchemaString]),
+        lasso.Optional("intheamkanbanassignee")       : schema.Or(None, str),
+        lasso.Optional("intheamkanbanboarduuid")      : schema.Or(None, lasso.UUID),
+        lasso.Optional("intheamkanbancolor")          : schema.Or(None, str),
+        lasso.Optional("intheamkanbancolumn")         : schema.Or(None, str),
+        lasso.Optional("intheamkanbansortorder")      : schema.Or(None, str),
+        lasso.Optional("intheamkanbantaskuuid")       : schema.Or(None, lasso.UUID),
+        lasso.Optional("intheamoriginalemailid")      : schema.Or(None, str),
+        lasso.Optional("intheamoriginalemailsubject") : schema.Or(None, str),
+    }
 
     def __init__(self, api=None, **kw):
         super(Task, self).__init__(**kw)
@@ -205,17 +120,6 @@ class Task(Schemed):
 
     def delete(self):
         return self.__api.delete_task(self)
-
-
-class CustomJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, datetime):
-            return o.strftime(DATE_FORMAT)
-        elif isinstance(o, uuid.UUID):
-            return str(o)
-        elif isinstance(o, Schemed):
-            return dict(iter(o))
-        return super(JSONEncoder, self).default(o)
 
 
 class InTheAmError(Exception):
