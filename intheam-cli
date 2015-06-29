@@ -48,13 +48,14 @@ print_fields = (
     "start",
     "progress",
 )
-def print_task(result):
+def print_task(result, verbose=False):
     task = yield from result
-    for field in print_fields:
+    fstr = "{!s:<25}: {!s}" if verbose else "{!s:<12}: {!s}"
+    for field in sorted(task.keys()) if verbose else print_fields:
         value = getattr(task, field, None)
         if value is None:
             continue
-        click.echo("{!s:<12}: {!s}".format(field, value))
+        click.echo(fstr.format(field, value))
 
 
 @cli.command("user-status")
@@ -88,14 +89,16 @@ def completed(api):
 
 
 @cli.command()
-@click.argument("uuid", "Unique identifier of the task")
+@click.argument("uuid", "Unique identifier of the task", type=click.UUID)
+@click.option("--verbose/--quiet", default=False,
+        help="Show all the fields of the task")
 @click.pass_obj
-def task(api, uuid):
+def task(api, uuid, verbose):
     """
     Show the details of a task.
     """
     asyncio.get_event_loop().run_until_complete(
-            print_task(api.task(uuid)))
+            print_task(api.task(str(uuid)), verbose))
 
 
 if __name__ == "__main__": cli()
