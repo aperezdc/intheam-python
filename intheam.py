@@ -15,7 +15,6 @@ http://intheam.readthedocs.org/en/latest/api/index.html
 
 import lasso
 import aiohttp
-import schema
 import uuid
 
 
@@ -94,15 +93,17 @@ class Task(lasso.Schemed):
 
         # inthe.am specific values; also validated but not used.
         # TODO: Check whether those are completely correct
-        lasso.Optional("intheamattachments")          : schema.Or(None, [SchemaString]),
-        lasso.Optional("intheamkanbanassignee")       : schema.Or(None, str),
-        lasso.Optional("intheamkanbanboarduuid")      : schema.Or(None, lasso.UUID),
-        lasso.Optional("intheamkanbancolor")          : schema.Or(None, str),
-        lasso.Optional("intheamkanbancolumn")         : schema.Or(None, str),
-        lasso.Optional("intheamkanbansortorder")      : schema.Or(None, str),
-        lasso.Optional("intheamkanbantaskuuid")       : schema.Or(None, lasso.UUID),
-        lasso.Optional("intheamoriginalemailid")      : schema.Or(None, str),
-        lasso.Optional("intheamoriginalemailsubject") : schema.Or(None, str),
+        lasso.Optional("intheamattachments")          : lasso.Or(None, [SchemaString]),
+        lasso.Optional("intheamkanbanassignee")       : lasso.Or(None, str),
+        lasso.Optional("intheamkanbanboarduuid")      : lasso.Or(None, lasso.UUID),
+        lasso.Optional("intheamkanbancolor")          : lasso.Or(None, str),
+        lasso.Optional("intheamkanbancolumn")         : lasso.Or(None, str),
+        lasso.Optional("intheamkanbansortorder")      : lasso.Or(None, str),
+        lasso.Optional("intheamkanbantaskuuid")       : lasso.Or(None, lasso.UUID),
+        lasso.Optional("intheamoriginalemailid")      : lasso.Or(None, str),
+        lasso.Optional("intheamoriginalemailsubject") : lasso.Or(None, str),
+        lasso.Optional("intheamtrelloid")             : lasso.Or(None, str),
+        lasso.Optional("intheamtrelloboardid")        : lasso.Or(None, str),
     }
 
     def __init__(self, api=None, **kw):
