@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim:fenc=utf-8
 #
-# Copyright © 2015 Adrian Perez <aperez@igalia.com>
+# Copyright © 2015-2016 Adrian Perez <aperez@igalia.com>
 #
 # Distributed under terms of the MIT license.
 
@@ -21,7 +21,7 @@ def file_contents(*relpath):
 if __name__ == "__main__":
     setup(
         name="intheam",
-        version="0.0.2",
+        version="0.0.3",
         description="Wrapper around the inthe.am API",
         long_description=file_contents("README.rst"),
         author="Adrián Pérez de Castro",

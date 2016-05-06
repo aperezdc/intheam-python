@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim:fenc=utf-8
 #
-# Copyright © 2015 Adrian Perez <aperez@igalia.com>
+# Copyright © 2015-2016 Adrian Perez <aperez@igalia.com>
 #
 # Distributed under terms of the MIT license.
 
