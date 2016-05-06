@@ -13,7 +13,7 @@ The API consumed by this module is described here:
 http://intheam.readthedocs.org/en/latest/api/index.html
 """
 
-import lasso
+import gnarl
 import aiohttp
 import uuid
 
@@ -21,28 +21,28 @@ import uuid
 BASE_URL = "https://inthe.am/api/v1"
 
 
-class Priority(lasso.Enum):
+class Priority(gnarl.Enum):
     HIGH   = "H"
     MEDIUM = "M"
     LOW    = "L"
 
-class Status(lasso.Enum):
+class Status(gnarl.Enum):
     PENDING   = "pending"
     COMPLETED = "completed"
     WAITING   = "waiting"
     DELETED   = "deleted"
 
 
-class SchemaDate(lasso.Timestamp):
-    __format__ = lasso.Timestamp.FORMAT_RFC_2822
+class SchemaDate(gnarl.Timestamp):
+    __format__ = gnarl.Timestamp.FORMAT_RFC_2822
 
-SchemaString = lasso.And(str, len)
+SchemaString = gnarl.And(str, len)
 
 
-class Annotation(lasso.Schemed):
+class Annotation(gnarl.Schemed):
     __schema__ = {
         "description" : SchemaString,
-        "entry"       : lasso.Or(None, SchemaDate),
+        "entry"       : gnarl.Or(None, SchemaDate),
     }
     __NOW = object()
 
@@ -61,49 +61,49 @@ class Annotation(lasso.Schemed):
             return super(Annotation, cls).validate(data)
 
 
-class Task(lasso.Schemed):
+class Task(gnarl.Schemed):
     __schema__ = {
         "description"  : SchemaString,
-        "status"       : lasso.Or(None, Status),
-        "priority"     : lasso.Or(None, Priority),
-        "id"           : lasso.UUID,
+        "status"       : gnarl.Or(None, Status),
+        "priority"     : gnarl.Or(None, Priority),
+        "id"           : gnarl.UUID,
         "annotations"  : [Annotation],
-        "blocks"       : [lasso.UUID],
-        "depends"      : [lasso.UUID],
-        "due"          : lasso.Or(None, SchemaDate),
+        "blocks"       : [gnarl.UUID],
+        "depends"      : [gnarl.UUID],
+        "due"          : gnarl.Or(None, SchemaDate),
         "entry"        : SchemaDate,
         "modified"     : SchemaDate,
-        "progress"     : lasso.Or(None, float),
-        "project"      : lasso.Or(None, SchemaString),
-        "scheduled"    : lasso.Or(None, SchemaDate),
-        "start"        : lasso.Or(None, SchemaDate),
+        "progress"     : gnarl.Or(None, float),
+        "project"      : gnarl.Or(None, SchemaString),
+        "scheduled"    : gnarl.Or(None, SchemaDate),
+        "start"        : gnarl.Or(None, SchemaDate),
         "short_id"     : int,
         "urgency"      : float,
         "tags"         : [SchemaString],
 
         # Optional values added by the inthe.am API,
         # which locally created tasks do not have
-        lasso.Optional("resource_uri") : lasso.Or(None, SchemaString),
-        lasso.Optional("url")          : lasso.Or(None, SchemaString),
-        lasso.Optional("uuid")         : lasso.UUID,
+        "resource_uri" : gnarl.Optional(gnarl.Or(None, SchemaString)),
+        "url"          : gnarl.Optional(gnarl.Or(None, SchemaString)),
+        "uuid"         : gnarl.Optional(gnarl.UUID),
 
         # Validated but ignored.
-        "imask" : lasso.Or(None, str),
-        "wait"  : lasso.Or(None, lasso.UUID),
+        "imask"        : gnarl.Or(None, str),
+        "wait"         : gnarl.Or(None, gnarl.UUID),
 
         # inthe.am specific values; also validated but not used.
         # TODO: Check whether those are completely correct
-        lasso.Optional("intheamattachments")          : lasso.Or(None, [SchemaString]),
-        lasso.Optional("intheamkanbanassignee")       : lasso.Or(None, str),
-        lasso.Optional("intheamkanbanboarduuid")      : lasso.Or(None, lasso.UUID),
-        lasso.Optional("intheamkanbancolor")          : lasso.Or(None, str),
-        lasso.Optional("intheamkanbancolumn")         : lasso.Or(None, str),
-        lasso.Optional("intheamkanbansortorder")      : lasso.Or(None, str),
-        lasso.Optional("intheamkanbantaskuuid")       : lasso.Or(None, lasso.UUID),
-        lasso.Optional("intheamoriginalemailid")      : lasso.Or(None, str),
-        lasso.Optional("intheamoriginalemailsubject") : lasso.Or(None, str),
-        lasso.Optional("intheamtrelloid")             : lasso.Or(None, str),
-        lasso.Optional("intheamtrelloboardid")        : lasso.Or(None, str),
+        "intheamattachments"          : gnarl.Optional(gnarl.Or(None, [SchemaString])),
+        "intheamkanbanassignee"       : gnarl.Optional(gnarl.Or(None, str)),
+        "intheamkanbanboarduuid"      : gnarl.Optional(gnarl.Or(None, gnarl.UUID)),
+        "intheamkanbancolor"          : gnarl.Optional(gnarl.Or(None, str)),
+        "intheamkanbancolumn"         : gnarl.Optional(gnarl.Or(None, str)),
+        "intheamkanbansortorder"      : gnarl.Optional(gnarl.Or(None, str)),
+        "intheamkanbantaskuuid"       : gnarl.Optional(gnarl.Or(None, gnarl.UUID)),
+        "intheamoriginalemailid"      : gnarl.Optional(gnarl.Or(None, str)),
+        "intheamoriginalemailsubject" : gnarl.Optional(gnarl.Or(None, str)),
+        "intheamtrelloid"             : gnarl.Optional(gnarl.Or(None, str)),
+        "intheamtrelloboardid"        : gnarl.Optional(gnarl.Or(None, str)),
     }
 
     def __init__(self, api=None, **kw):

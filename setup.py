@@ -30,7 +30,7 @@ if __name__ == "__main__":
         py_modules=["intheam"],
         scripts=["intheam-cli"],
         install_requires=[
-            "lasso>=0.0.3",
+            "gnarl>=0.1.0a3",
             "aiohttp>=0.16.0",
         ],
         extras_require={

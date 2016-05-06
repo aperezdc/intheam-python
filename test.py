@@ -6,7 +6,7 @@
 #
 # Distributed under terms of the MIT license.
 
-import lasso
+import gnarl
 import intheam
 import unittest
 
@@ -17,7 +17,7 @@ class TestAnnotation(unittest.TestCase):
         self.assertIsInstance(ann, intheam.Annotation)
         self.assertEqual("Foo bar", ann.description)
         # A default value for the "entry" date must have been created
-        self.assertIsInstance(ann.entry, lasso.Timestamp)
+        self.assertIsInstance(ann.entry, gnarl.Timestamp)
 
     def test_create_datetime(self):
         now = intheam.SchemaDate.now()
@@ -45,7 +45,7 @@ class TestAnnotation(unittest.TestCase):
         }
         ann = intheam.Annotation.validate(data)
         self.assertIsInstance(ann, intheam.Annotation)
-        self.assertIsInstance(ann.entry, lasso.Timestamp)
+        self.assertIsInstance(ann.entry, gnarl.Timestamp)
         from delorean.interface import parse
         self.assertEqual(ann.entry, parse(data["entry"]))
 
@@ -56,7 +56,7 @@ class TestAnnotation(unittest.TestCase):
         }
         ann = intheam.Annotation.validate(data)
         self.assertIsInstance(ann, intheam.Annotation)
-        self.assertIsInstance(ann.entry, lasso.Timestamp)
+        self.assertIsInstance(ann.entry, gnarl.Timestamp)
 
     def test_create_from_dict_no_date(self):
         ann = intheam.Annotation.validate({
